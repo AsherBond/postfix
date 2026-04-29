@@ -64,6 +64,8 @@
 /* Global library. */
 
 #include <mail_params.h>
+#include <match_parent_style.h>
+#include <yana_policy.h>
 
 /* TLS library. */
 
@@ -84,15 +86,23 @@
   * Pre-computed state based on configuration parameters. TODO(wietse): some
   * legacy booleans use "|=". Fix that when this code is factored out.
   */
+bool    psc_tls_ready;
+
+#ifdef USE_TLS
 TLS_SERVER_PARAMS psc_tls_params;
 TLS_SERVER_INIT_PROPS psc_init_props;
-bool    psc_tls_ready;
+#endif
 
  /*
   * Private state.
   */
 static bool psc_tls_pre_jail_done;
 static int ask_client_cert;
+
+ /*
+  * Per-peer TLS logging policy.
+  */
+static YANA_POLICY *psc_tls_loglevel_maps;
 
 /* psc_tls_pre_jail - pre-compute per-process TLS properties */
 
@@ -143,7 +153,6 @@ bool    psc_tls_pre_jail(void)
 	int     have_server_cert;
 	int     no_server_cert_ok;
 	int     require_server_cert;
-
 
 	/*
 	 * Can't use anonymous ciphers if we want client certificates. Must
@@ -221,6 +230,18 @@ bool    psc_tls_pre_jail(void)
 	msg_warn("TLS has been selected, but TLS support is not compiled in");
 #endif
     }
+
+    /*
+     * Per-peer TLS logging.
+     */
+#ifdef USE_TLS
+    if (*var_psc_tls_loglevel_maps)
+	psc_tls_loglevel_maps =
+	    yana_policy_create(VAR_PSC_TLS_LOGLEVEL_MAPS,
+			       var_psc_tls_loglevel_maps,
+			     match_parent_style(VAR_PSC_TLS_LOGLEVEL_MAPS));
+#endif
+
     psc_tls_pre_jail_done = true;
     return (psc_tls_ready);
 }
@@ -229,15 +250,26 @@ bool    psc_tls_pre_jail(void)
 
 /* psc_tls_pre_start - assign per-request TLS properties */
 
-bool    psc_tls_pre_start(const char *remote_endpt,
+bool    psc_tls_pre_start(const PSC_STATE *state,
 			          TLS_SERVER_START_PROPS *start_props)
 {
     static char *cipher_grade;
     static VSTRING *cipher_exclusions;
     int     requirecert;
+    const char *peer_log_param;
+    const char *peer_log_level;
 
     if (!psc_tls_ready)
 	return (false);
+
+    if (psc_tls_loglevel_maps
+	&& (peer_log_level = yana_policy_lookup(psc_tls_loglevel_maps,
+				       "", state->smtp_client_addr)) != 0) {
+	peer_log_param = VAR_PSC_TLS_LOGLEVEL_MAPS;
+    } else {
+	peer_log_param = VAR_PSC_TLS_LOGLEVEL;
+	peer_log_level = var_smtpd_tls_loglevel;
+    }
 
     /*
      * In non-wrapper mode, it is possible to require client certificate
@@ -269,11 +301,13 @@ bool    psc_tls_pre_start(const char *remote_endpt,
     }
     requirecert = (var_psc_tls_req_ccert && var_psc_enforce_tls);
     TLS_PROXY_SERVER_START_PROPS(start_props,
+				 log_param = peer_log_param,
+				 log_level = peer_log_level,
 				 timeout = var_psc_starttls_tmout,
 				 enable_rpk = var_psc_tls_enable_rpk,
 				 requirecert = requirecert,
 				 serverid = var_servname,
-				 namaddr = remote_endpt,
+				 namaddr = state->smtp_client_addr_port,
 				 cipher_grade = cipher_grade,
 				 cipher_exclusions = STR(cipher_exclusions),
 				 mdalg = var_psc_tls_fpt_dgst);

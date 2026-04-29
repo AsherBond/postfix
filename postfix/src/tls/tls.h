@@ -496,6 +496,8 @@ typedef struct {
 
 typedef struct {
     TLS_APPL_STATE *ctx;
+    const char *log_param;
+    const char *log_level;
     VSTREAM *stream;
     int     fd;				/* Event-driven file descriptor */
     int     timeout;
@@ -538,13 +540,13 @@ extern TLS_SESS_STATE *tls_client_post_connect(TLS_SESS_STATE *,
     a6, a7, a8, a9, a10, a11, a12, a13, a14))
 
 #define TLS_CLIENT_START(props, a1, a2, a3, a4, a5, a6, a7, a8, a9, \
-    a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) \
+    a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22) \
     tls_client_start((((props)->a1), ((props)->a2), ((props)->a3), \
     ((props)->a4), ((props)->a5), ((props)->a6), ((props)->a7), \
     ((props)->a8), ((props)->a9), ((props)->a10), ((props)->a11), \
     ((props)->a12), ((props)->a13), ((props)->a14), ((props)->a15), \
     ((props)->a16), ((props)->a17), ((props)->a18), ((props)->a19), \
-    ((props)->a20), (props)))
+    ((props)->a20), ((props)->a21), ((props)->a22), (props)))
 
  /*
   * tls_server.c
@@ -574,6 +576,8 @@ typedef struct {
 
 typedef struct {
     TLS_APPL_STATE *ctx;		/* TLS application context */
+    const char *log_param;
+    const char *log_level;
     VSTREAM *stream;			/* Client stream */
     int     fd;				/* Event-driven file descriptor */
     int     timeout;			/* TLS handshake timeout */
@@ -608,11 +612,11 @@ extern TLS_SESS_STATE *tls_server_post_accept(TLS_SESS_STATE *);
     a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20))
 
 #define TLS_SERVER_START(props, a1, a2, a3, a4, a5, a6, a7, a8, a9, \
-    a10, a11) \
+    a10, a11, a12, a13) \
     tls_server_start((((props)->a1), ((props)->a2), ((props)->a3), \
     ((props)->a4), ((props)->a5), ((props)->a6), ((props)->a7), \
     ((props)->a8), ((props)->a9), ((props)->a10), ((props)->a11), \
-    (props)))
+    ((props)->a12), ((props)->a13), (props)))
 
  /*
   * tls_session.c

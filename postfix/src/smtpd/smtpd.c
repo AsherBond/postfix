@@ -557,6 +557,11 @@
 /*	Whether to trust client certificates whose extended key usage (EKU) lists
 /*	only \fBserverAuth\fR and not \fBclientAuth\fR as valid TLS client
 /*	certificates.
+/* .PP
+/*	Available in Postfix version 3.12 and later:
+/* .IP "\fBsmtpd_tls_loglevel_maps (empty)\fR"
+/*	Optional TLS loglevel override that depends on the remote peer
+/*	host name or IP address.
 /* OBSOLETE TLS CONTROLS
 /* .ad
 /* .fi
@@ -1344,6 +1349,10 @@
 #include <info_log_addr_form.h>
 #include <hfrom_format.h>
 
+#ifdef USE_TLS
+#include <yana_policy.h>
+#endif
+
 /* Single-threaded server skeleton. */
 
 #include <mail_server.h>
@@ -1519,6 +1528,7 @@ char   *var_smtpd_tls_dh512_param_file;
 char   *var_smtpd_tls_dkey_file;
 char   *var_smtpd_tls_key_file;
 char   *var_smtpd_tls_loglevel;
+char   *var_smtpd_tls_loglevel_maps;
 char   *var_smtpd_tls_mand_proto;
 bool    var_smtpd_tls_received_header;
 bool    var_smtpd_tls_req_ccert;
@@ -1672,6 +1682,11 @@ static TLS_APPL_STATE *smtpd_tls_ctx;
 
 #endif					/* USE_TLSPROXY */
 static int ask_client_cert;
+
+ /*
+  * Per-peer TLS logging policy.
+  */
+static YANA_POLICY *smtpd_tls_loglevel_maps;
 
 #endif
 
@@ -5254,6 +5269,17 @@ static void smtpd_start_tls(SMTPD_STATE *state)
     TLS_SERVER_START_PROPS props;
     static char *cipher_grade;
     static VSTRING *cipher_exclusions;
+    const char *peer_log_param;
+    const char *peer_log_level;
+
+    if (smtpd_tls_loglevel_maps
+	&& (peer_log_level = yana_policy_lookup(smtpd_tls_loglevel_maps,
+					  state->name, state->addr)) != 0) {
+	peer_log_param = VAR_SMTPD_TLS_LOGLEVEL_MAPS;
+    } else {
+	peer_log_param = VAR_SMTPD_TLS_LOGLEVEL;
+	peer_log_level = var_smtpd_tls_loglevel;
+    }
 
 #ifdef USE_TLSPROXY
     TLS_SERVER_PARAMS tls_params;
@@ -5310,6 +5336,8 @@ static void smtpd_start_tls(SMTPD_STATE *state)
      */
     tls_proxy_server_param_from_config(&tls_params);
     TLS_PROXY_SERVER_START_PROPS(&props,
+				 log_param = peer_log_param,
+				 log_level = peer_log_level,
 				 timeout = var_smtpd_starttls_tmout,
 				 enable_rpk = var_smtpd_tls_enable_rpk,
 				 requirecert = requirecert,
@@ -5355,6 +5383,8 @@ static void smtpd_start_tls(SMTPD_STATE *state)
     state->tls_context =
 	TLS_SERVER_START(&props,
 			 ctx = smtpd_tls_ctx,
+			 log_param = peer_log_param,
+			 log_level = peer_log_level,
 			 stream = state->client,
 			 fd = -1,
 			 timeout = var_smtpd_starttls_tmout,
@@ -6745,6 +6775,17 @@ static void pre_jail_init(char *unused_name, char **unused_argv)
      */
     if (*var_smtpd_rej_ftr_maps || *var_smtpd_reject_filter_maps)
 	smtpd_chat_pre_jail_init();
+
+    /*
+     * Per-peer TLS logging.
+     */
+#ifdef USE_TLS
+    if (*var_smtpd_tls_loglevel_maps)
+	smtpd_tls_loglevel_maps =
+	    yana_policy_create(VAR_SMTPD_TLS_LOGLEVEL_MAPS,
+			       var_smtpd_tls_loglevel_maps,
+			   match_parent_style(VAR_SMTPD_TLS_LOGLEVEL_MAPS));
+#endif
 }
 
 /* post_jail_init - post-jail initialization */
@@ -6981,6 +7022,7 @@ int     main(int argc, char **argv)
 	VAR_SMTPD_TLS_EECDH, DEF_SMTPD_TLS_EECDH, &var_smtpd_tls_eecdh, 1, 0,
 	VAR_SMTPD_TLS_FPT_DGST, DEF_SMTPD_TLS_FPT_DGST, &var_smtpd_tls_fpt_dgst, 1, 0,
 	VAR_SMTPD_TLS_LOGLEVEL, DEF_SMTPD_TLS_LOGLEVEL, &var_smtpd_tls_loglevel, 0, 0,
+	VAR_SMTPD_TLS_LOGLEVEL_MAPS, DEF_SMTPD_TLS_LOGLEVEL_MAPS, &var_smtpd_tls_loglevel_maps, 0, 0,
 #endif
 	VAR_SMTPD_TLS_LEVEL, DEF_SMTPD_TLS_LEVEL, &var_smtpd_tls_level, 0, 0,
 	VAR_SMTPD_SASL_TYPE, DEF_SMTPD_SASL_TYPE, &var_smtpd_sasl_type, 1, 0,

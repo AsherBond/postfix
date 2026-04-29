@@ -31014,6 +31014,40 @@ Apologies for any names omitted.
 	value in the configuration parameter dictionary. File:
 	global/mail_params.c.
 
+20260426
+
+	Portability: support for recent FreeBSD, NetBSD and OpenBSD
+	versions. Brad Smith. Files: makedefs, util/sys_defs.h.
+
+	Future proofing: eliminate duplicate makedefs sections for
+	similar OS versions, and reduce OS version toil. Major OS
+	versions still need to be blessed in <sys_defs.h>. File:
+	makedefs.
+
+20260428
+
+	Feature: per-peer TLS logging support, configurable with
+	smtp_tls_loglevel_maps, smtpd_tls_loglevel_maps, and
+	postscreen_tls_loglevel_maps. This adds two arguments to
+	each tls_client_start() and tls_server_start() call. Files:
+	mantools/postlink, proto/postconf.proto, global/mail_params.h,
+	global/yana_policy.c, global/yana_policy.h,
+	global/yana_policy_test.c postscreen/postscreen.c,
+	postscreen/postscreen.h, postscreen/postscreen_starttls.c,
+	postscreen/postscreen_state.c, postscreen/postscreen_tls_conf.c,
+	posttls-finger/posttls-finger.c, smtp/smtp.c, smtp/smtp.h,
+	smtp/smtp_proto.c, smtpd/smtpd.c, tls/tls_client.c, tls/tls.h,
+	tls/tls_misc.c, tls/tls_proxy_client_start_proto.[hc],
+	tls/tls_proxy_server_start_proto.[hc], tls/tls_server.c.
+
+	Next up is replacing a large number of "[%s]:%s" format strings
+	in postscreen code.
+
+20240629
+
+	Testing: portability. Files: postscreen/postscreen_dnsbl_test.c,
+	testing/mock_myaddrinfo_test.c.
+
 TODO
 
 	Reorganize PTEST_LIB, PMOCK_LIB, TESTLIB, TESTLIBS, etc.

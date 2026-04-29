@@ -5976,6 +5976,16 @@ configuration parameter.  See there for details. </p>
 
 </DD>
 
+<DT><b><a name="lmtp_tls_loglevel_maps">lmtp_tls_loglevel_maps</a>
+(default: $<a href="postconf.5.html#smtp_tls_loglevel_maps">smtp_tls_loglevel_maps</a>)</b></DT><DD>
+
+<p> The <a href="lmtp.8.html">lmtp(8)</a> equivalent of <a href="postconf.5.html#smtp_tls_loglevel_maps">smtp_tls_loglevel_maps</a>. </p>
+
+<p> This feature is available in Postfix 3.12 and later. </p>
+
+
+</DD>
+
 <DT><b><a name="lmtp_tls_mandatory_ciphers">lmtp_tls_mandatory_ciphers</a>
 (default: medium)</b></DT><DD>
 
@@ -9823,6 +9833,18 @@ further details. </p>
 (default: $<a href="postconf.5.html#smtpd_tls_loglevel">smtpd_tls_loglevel</a>)</b></DT><DD>
 
 <p> The <a href="postscreen.8.html">postscreen(8)</a> equivalent of <a href="postconf.5.html#smtpd_tls_loglevel">smtpd_tls_loglevel</a>. </p>
+
+<p> This feature is available in Postfix 3.12 and later. </p>
+
+
+</DD>
+
+<DT><b><a name="postscreen_tls_loglevel_maps">postscreen_tls_loglevel_maps</a>
+(default: $<a href="postconf.5.html#smtpd_tls_loglevel_maps">smtpd_tls_loglevel_maps</a>)</b></DT><DD>
+
+<p> Optional TLS loglevel override that depends on the remote peer
+host name or IP address. See <a href="postconf.5.html#smtp_tls_loglevel_maps">smtp_tls_loglevel_maps</a> for a detailed
+description.
 
 <p> This feature is available in Postfix 3.12 and later. </p>
 
@@ -14984,6 +15006,83 @@ transmission after STARTTLS. </dd>
 problems. Use of loglevel 4 is strongly discouraged. </p>
 
 <p> This feature is available in Postfix 2.2 and later.  </p>
+
+
+</DD>
+
+<DT><b><a name="smtp_tls_loglevel_maps">smtp_tls_loglevel_maps</a>
+(default: empty)</b></DT><DD>
+
+<p> Optional TLS loglevel override that depends on the remote peer
+host name or IP address. The text below also covers <a href="postconf.5.html#smtpd_tls_loglevel_maps">smtpd_tls_loglevel_maps</a>
+and <a href="postconf.5.html#postscreen_tls_loglevel_maps">postscreen_tls_loglevel_maps</a>. </p>
+
+<p> Specify zero or more lookup tables separated by comma or
+whitespace. The table syntax is as follows: <p>
+
+<ul>
+
+<li> <p> On the left-hand side, specify a domain name, IPv4 or IPv6
+network address, or a substring pattern as described below. An
+internationalized domain name MUST be in A-label form (xn--mumble).
+An IPv4 address MUST be in dotted-quad form; an IPv6 address MUST
+be in compressed form (text::text). Do not enclose any of these
+inputs with "[" and "]". </p>
+
+<li> <p> On the right-hand side, specify a valid TLS loglevel value,
+or "DUNNO" for a "quick exit" as described below. </p>
+
+</ul>
+
+<p> The over-all search strategy is as follows: </p>
+
+<ul>
+
+<li> <p> Look up the peer name in all specified lookup tables, and
+stop at the first match. If no match was found, this may be followed
+by substring lookups as described below. Note: peer name lookup is
+not applicable for <a href="postscreen.8.html">postscreen(8)</a> because that service does not have
+the remote SMTP client name. </p>
+
+<li> <p> If no peer name match is found, look up the peer IP address
+in all specified lookup tables, and stop at the first match. If no
+match was found, this may be followed by substring lookups as
+described below. </p>
+
+<li> <p> If any lookup result returns "DUNNO", terminate the search
+and pretend that no name match and no address match were found.
+</p>
+
+</ul>
+
+<p> This feature may generate substring queries for a fixed-string
+lookup table (examples: <a href="DATABASE_README.html#types">hash</a>:, <a href="lmdb_table.5.html">lmdb</a>:, <a href="pgsql_table.5.html">pgsql</a>:). Substring queries
+do not happen with <a href="regexp_table.5.html">regexp</a>:, <a href="pcre_table.5.html">pcre</a>:, and <a href="cidr_table.5.html">cidr</a>: tables. </p>
+
+<ul>
+
+<li> <p> By default, after all table queries with a full domain
+name (example: "mail.example.com") produce "not found", the next
+queries will use the parent domains with '.' prepended (examples:
+".example.com" and ".com") until a match is found or until all
+substrings have been tried. </p>
+
+<li> <p> To generate domain name substring queries without the
+leading '.' (examples: "example.com" and "com"), specify the
+applicable configuration parameter name ("smtpd_tls_policy_maps",
+"<a href="postconf.5.html#smtp_tls_policy_maps">smtp_tls_policy_maps</a>", or "postscreen_tls_policy_maps") in the
+<a href="postconf.5.html#parent_domain_matches_subdomains">parent_domain_matches_subdomains</a> parameter value. </p>
+
+<li> <p> After all table queries with a full IP address produce
+"not found", the next queries will use subnetworks, by repeatedly
+removing the last ".text" component from a dotted-quad IPv4 address,
+or the last ":text" component from a compressed-form IPv6 address,
+until a match is found or until all subnetworks have been tried.
+</p>
+
+</ul>
+
+<p> This feature is available in Postfix 3.12 and later. </p>
 
 
 </DD>
@@ -20502,6 +20601,18 @@ transmission after STARTTLS. </dd>
 of problems. Use of loglevel 4 is strongly discouraged. </p>
 
 <p> This feature is available in Postfix 2.2 and later.  </p>
+
+
+</DD>
+
+<DT><b><a name="smtpd_tls_loglevel_maps">smtpd_tls_loglevel_maps</a>
+(default: empty)</b></DT><DD>
+
+<p> Optional TLS loglevel override that depends on the remote peer
+host name or IP address. See <a href="postconf.5.html#smtp_tls_loglevel_maps">smtp_tls_loglevel_maps</a> for a detailed
+description.
+
+<p> This feature is available in Postfix 3.12 and later. </p>
 
 
 </DD>

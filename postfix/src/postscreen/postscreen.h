@@ -80,6 +80,7 @@ typedef struct {
     int     smtp_server_fd;		/* real SMTP server */
     char   *smtp_client_addr;		/* client address */
     char   *smtp_client_port;		/* client port */
+    char   *smtp_client_addr_port;	/* [client_addr]:client_port */
     char   *smtp_server_addr;		/* server address */
     char   *smtp_server_port;		/* server port */
     const char *final_reply;		/* cause for hanging up */
@@ -417,6 +418,8 @@ extern HTABLE *psc_client_concurrency;	/* per-client concurrency */
 
  /*
   * postscreen_state.c
+  * 
+  * TODO(wietse): migrate PSC_CLIENT_ADDR_PORT to smtp_client_addr_port.
   */
 #define PSC_CLIENT_ADDR_PORT(state) \
 	(state)->smtp_client_addr, (state)->smtp_client_port
@@ -571,7 +574,7 @@ extern bool psc_tls_pre_jail(void);
 #ifdef USE_TLS
 extern TLS_SERVER_PARAMS psc_tls_params;
 extern TLS_SERVER_INIT_PROPS psc_init_props;
-extern bool psc_tls_pre_start(const char *, TLS_SERVER_START_PROPS *);
+extern bool psc_tls_pre_start(const PSC_STATE *, TLS_SERVER_START_PROPS *);
 
 #endif
 

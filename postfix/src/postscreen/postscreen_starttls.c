@@ -204,7 +204,6 @@ static void psc_starttls_first(int event, void *context)
     PSC_STARTTLS *starttls_state = (PSC_STARTTLS *) context;
     PSC_STATE *smtp_state = starttls_state->smtp_state;
     VSTREAM *tlsproxy_stream = starttls_state->tlsproxy_stream;
-    static VSTRING *remote_endpt = 0;
     TLS_SERVER_START_PROPS start_props;
 
     if (msg_verbose)
@@ -242,18 +241,12 @@ static void psc_starttls_first(int event, void *context)
      * Send the data attributes now, and send the client file descriptor in a
      * later transaction. We report all errors asynchronously, to avoid
      * having to maintain multiple error delivery paths.
-     * 
-     * XXX The formatted endpoint should be a state member. Then, we can
-     * simplify all the format strings throughout the program.
      */
-    if (remote_endpt == 0)
-	remote_endpt = vstring_alloc(20);
-    vstring_sprintf(remote_endpt, "[%s]:%s", smtp_state->smtp_client_addr,
-		    smtp_state->smtp_client_port);
-    psc_tls_pre_start(STR(remote_endpt), &start_props);
+    psc_tls_pre_start(smtp_state, &start_props);
 
     if (attr_print(tlsproxy_stream, ATTR_FLAG_NONE,
-		   SEND_ATTR_STR(TLS_ATTR_REMOTE_ENDPT, STR(remote_endpt)),
+		   SEND_ATTR_STR(TLS_ATTR_REMOTE_ENDPT,
+				 smtp_state->smtp_client_addr_port),
 		   SEND_ATTR_INT(TLS_ATTR_FLAGS, TLS_PROXY_FLAG_ROLE_SERVER),
 		 SEND_ATTR_INT(TLS_ATTR_TIMEOUT, psc_normal_cmd_time_limit),
 		 SEND_ATTR_INT(TLS_ATTR_TIMEOUT, psc_normal_cmd_time_limit),

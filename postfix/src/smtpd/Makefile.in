@@ -316,6 +316,7 @@ smtpd.o: ../../include/vstring.h
 smtpd.o: ../../include/vstring_vstream.h
 smtpd.o: ../../include/watchdog.h
 smtpd.o: ../../include/xtext.h
+smtpd.o: ../../include/yana_policy.h
 smtpd.o: smtpd.c
 smtpd.o: smtpd.h
 smtpd.o: smtpd_chat.h

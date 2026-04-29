@@ -657,6 +657,7 @@ postscreen_tls_conf.o: ../../include/htable.h
 postscreen_tls_conf.o: ../../include/mail_params.h
 postscreen_tls_conf.o: ../../include/maps.h
 postscreen_tls_conf.o: ../../include/match_list.h
+postscreen_tls_conf.o: ../../include/match_parent_style.h
 postscreen_tls_conf.o: ../../include/msg.h
 postscreen_tls_conf.o: ../../include/myaddrinfo.h
 postscreen_tls_conf.o: ../../include/myflock.h
@@ -680,5 +681,6 @@ postscreen_tls_conf.o: ../../include/tls_proxy_server_start_proto.h
 postscreen_tls_conf.o: ../../include/vbuf.h
 postscreen_tls_conf.o: ../../include/vstream.h
 postscreen_tls_conf.o: ../../include/vstring.h
+postscreen_tls_conf.o: ../../include/yana_policy.h
 postscreen_tls_conf.o: postscreen.h
 postscreen_tls_conf.o: postscreen_tls_conf.c

@@ -3630,6 +3630,10 @@ The LMTP\-specific version of the smtp_tls_loglevel
 configuration parameter.  See there for details.
 .PP
 This feature is available in Postfix 2.3 and later.
+.SH lmtp_tls_loglevel_maps (default: $smtp_tls_loglevel_maps)
+The \fBlmtp\fR(8) equivalent of smtp_tls_loglevel_maps.
+.PP
+This feature is available in Postfix 3.12 and later.
 .SH lmtp_tls_mandatory_ciphers (default: medium)
 The LMTP\-specific version of the smtp_tls_mandatory_ciphers
 configuration parameter.  See there for details.
@@ -6104,6 +6108,12 @@ The \fBpostscreen\fR(8) equivalent of smtpd_tls_key_file.
 This feature is available in Postfix 3.12 and later.
 .SH postscreen_tls_loglevel (default: $smtpd_tls_loglevel)
 The \fBpostscreen\fR(8) equivalent of smtpd_tls_loglevel.
+.PP
+This feature is available in Postfix 3.12 and later.
+.SH postscreen_tls_loglevel_maps (default: $smtpd_tls_loglevel_maps)
+Optional TLS loglevel override that depends on the remote peer
+host name or IP address. See smtp_tls_loglevel_maps for a detailed
+description.
 .PP
 This feature is available in Postfix 3.12 and later.
 .SH postscreen_tls_mandatory_ciphers (default: $smtpd_tls_mandatory_ciphers)
@@ -9885,6 +9895,66 @@ Do not use "smtp_tls_loglevel = 2" or higher except in case of
 problems. Use of loglevel 4 is strongly discouraged.
 .PP
 This feature is available in Postfix 2.2 and later.
+.SH smtp_tls_loglevel_maps (default: empty)
+Optional TLS loglevel override that depends on the remote peer
+host name or IP address. The text below also covers smtpd_tls_loglevel_maps
+and postscreen_tls_loglevel_maps.
+.PP
+Specify zero or more lookup tables separated by comma or
+whitespace. The table syntax is as follows:
+.IP \(bu
+On the left\-hand side, specify a domain name, IPv4 or IPv6
+network address, or a substring pattern as described below. An
+internationalized domain name MUST be in A\-label form (xn\-\-mumble).
+An IPv4 address MUST be in dotted\-quad form; an IPv6 address MUST
+be in compressed form (text::text). Do not enclose any of these
+inputs with "[" and "]".
+.IP \(bu
+On the right\-hand side, specify a valid TLS loglevel value,
+or "DUNNO" for a "quick exit" as described below.
+.br
+.PP
+The over\-all search strategy is as follows:
+.IP \(bu
+Look up the peer name in all specified lookup tables, and
+stop at the first match. If no match was found, this may be followed
+by substring lookups as described below. Note: peer name lookup is
+not applicable for \fBpostscreen\fR(8) because that service does not have
+the remote SMTP client name.
+.IP \(bu
+If no peer name match is found, look up the peer IP address
+in all specified lookup tables, and stop at the first match. If no
+match was found, this may be followed by substring lookups as
+described below.
+.IP \(bu
+If any lookup result returns "DUNNO", terminate the search
+and pretend that no name match and no address match were found.
+.br
+.PP
+This feature may generate substring queries for a fixed\-string
+lookup table (examples: hash:, lmdb:, pgsql:). Substring queries
+do not happen with regexp:, pcre:, and cidr: tables.
+.IP \(bu
+By default, after all table queries with a full domain
+name (example: "mail.example.com") produce "not found", the next
+queries will use the parent domains with '.' prepended (examples:
+".example.com" and ".com") until a match is found or until all
+substrings have been tried.
+.IP \(bu
+To generate domain name substring queries without the
+leading '.' (examples: "example.com" and "com"), specify the
+applicable configuration parameter name ("smtpd_tls_policy_maps",
+"smtp_tls_policy_maps", or "postscreen_tls_policy_maps") in the
+parent_domain_matches_subdomains parameter value.
+.IP \(bu
+After all table queries with a full IP address produce
+"not found", the next queries will use subnetworks, by repeatedly
+removing the last ".text" component from a dotted\-quad IPv4 address,
+or the last ":text" component from a compressed\-form IPv6 address,
+until a match is found or until all subnetworks have been tried.
+.br
+.PP
+This feature is available in Postfix 3.12 and later.
 .SH smtp_tls_mandatory_ciphers (default: medium)
 The minimum TLS cipher grade that the Postfix SMTP client will
 use with
@@ -14353,6 +14423,12 @@ Do not use "smtpd_tls_loglevel = 2" or higher except in case
 of problems. Use of loglevel 4 is strongly discouraged.
 .PP
 This feature is available in Postfix 2.2 and later.
+.SH smtpd_tls_loglevel_maps (default: empty)
+Optional TLS loglevel override that depends on the remote peer
+host name or IP address. See smtp_tls_loglevel_maps for a detailed
+description.
+.PP
+This feature is available in Postfix 3.12 and later.
 .SH smtpd_tls_mandatory_ciphers (default: medium)
 The minimum TLS cipher grade that the Postfix SMTP server will
 use with mandatory TLS encryption. The default grade ("medium") is

@@ -395,6 +395,9 @@
 /*	The \fBpostscreen\fR(8) equivalent of smtpd_tls_key_file.
 /* .IP "\fBpostscreen_tls_loglevel ($smtpd_tls_loglevel)\fR"
 /*	The \fBpostscreen\fR(8) equivalent of smtpd_tls_loglevel.
+/* .IP "\fBpostscreen_tls_loglevel_maps ($smtpd_tls_loglevel_maps)\fR"
+/*	Optional TLS loglevel override that depends on the remote peer
+/*	host name or IP address.
 /* .IP "\fBpostscreen_tls_mandatory_ciphers ($smtpd_tls_mandatory_ciphers)\fR"
 /*	The \fBpostscreen\fR(8) equivalent of smtpd_tls_mandatory_ciphers.
 /* .IP "\fBpostscreen_tls_mandatory_exclude_ciphers ($smtpd_tls_mandatory_exclude_ciphers)\fR"
@@ -635,6 +638,7 @@ char   *var_smtpd_tls_excl_ciph;
 char   *var_smtpd_tls_fpt_dgst;
 char   *var_smtpd_tls_key_file;
 char   *var_smtpd_tls_loglevel;
+char   *var_smtpd_tls_loglevel_maps;
 char   *var_smtpd_tls_mand_ciph;
 char   *var_smtpd_tls_mand_excl;
 char   *var_smtpd_tls_mand_proto;
@@ -664,6 +668,7 @@ char   *var_psc_tls_excl_ciph;
 char   *var_psc_tls_fpt_dgst;
 char   *var_psc_tls_key_file;
 char   *var_psc_tls_loglevel;
+char   *var_psc_tls_loglevel_maps;
 char   *var_psc_tls_mand_ciph;
 char   *var_psc_tls_mand_excl;
 char   *var_psc_tls_mand_proto;
@@ -1309,6 +1314,7 @@ int     main(int argc, char **argv)
 	VAR_SMTPD_TLS_FPT_DGST, DEF_SMTPD_TLS_FPT_DGST, &var_smtpd_tls_fpt_dgst, 1, 0,
 	VAR_SMTPD_TLS_KEY_FILE, DEF_SMTPD_TLS_KEY_FILE, &var_smtpd_tls_key_file, 0, 0,
 	VAR_SMTPD_TLS_LOGLEVEL, DEF_SMTPD_TLS_LOGLEVEL, &var_smtpd_tls_loglevel, 0, 0,
+	VAR_SMTPD_TLS_LOGLEVEL_MAPS, DEF_SMTPD_TLS_LOGLEVEL_MAPS, &var_smtpd_tls_loglevel_maps, 0, 0,
 	VAR_SMTPD_TLS_MAND_CIPH, DEF_SMTPD_TLS_MAND_CIPH, &var_smtpd_tls_mand_ciph, 1, 0,
 	VAR_SMTPD_TLS_MAND_EXCL, DEF_SMTPD_TLS_MAND_EXCL, &var_smtpd_tls_mand_excl, 0, 0,
 	VAR_SMTPD_TLS_MAND_PROTO, DEF_SMTPD_TLS_MAND_PROTO, &var_smtpd_tls_mand_proto, 0, 0,
@@ -1345,6 +1351,7 @@ int     main(int argc, char **argv)
 	VAR_PSC_TLS_FPT_DGST, DEF_PSC_TLS_FPT_DGST, &var_psc_tls_fpt_dgst, 1, 0,
 	VAR_PSC_TLS_KEY_FILE, DEF_PSC_TLS_KEY_FILE, &var_psc_tls_key_file, 0, 0,
 	VAR_PSC_TLS_LOGLEVEL, DEF_PSC_TLS_LOGLEVEL, &var_psc_tls_loglevel, 0, 0,
+	VAR_PSC_TLS_LOGLEVEL_MAPS, DEF_PSC_TLS_LOGLEVEL_MAPS, &var_psc_tls_loglevel_maps, 0, 0,
 	VAR_PSC_TLS_MAND_CIPH, DEF_PSC_TLS_MAND_CIPH, &var_psc_tls_mand_ciph, 1, 0,
 	VAR_PSC_TLS_MAND_EXCL, DEF_PSC_TLS_MAND_EXCL, &var_psc_tls_mand_excl, 0, 0,
 	VAR_PSC_TLS_MAND_PROTO, DEF_PSC_TLS_MAND_PROTO, &var_psc_tls_mand_proto, 0, 0,

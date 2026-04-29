@@ -1441,6 +1441,10 @@ extern char *var_smtpd_tls_eecdh;
 #define DEF_SMTPD_TLS_LOGLEVEL	"0"
 extern char *var_smtpd_tls_loglevel;
 
+#define VAR_SMTPD_TLS_LOGLEVEL_MAPS	"smtpd_tls_loglevel_maps"
+#define DEF_SMTPD_TLS_LOGLEVEL_MAPS	""
+extern char *var_smtpd_tls_loglevel_maps;
+
 #define VAR_SMTPD_TLS_RECHEAD	"smtpd_tls_received_header"
 #define DEF_SMTPD_TLS_RECHEAD	0
 extern bool var_smtpd_tls_received_header;
@@ -1614,6 +1618,13 @@ extern char *var_smtp_tls_tafile;
 #define DEF_LMTP_TLS_LOGLEVEL	"0"
 extern char *var_smtp_tls_loglevel;	/* In smtp(8) and tlsmgr(8) */
 extern char *var_lmtp_tls_loglevel;	/* In tlsmgr(8) */
+
+#define VAR_SMTP_TLS_LOGLEVEL_MAPS	"smtp_tls_loglevel_maps"
+#define DEF_SMTP_TLS_LOGLEVEL_MAPS	""
+#define VAR_LMTP_TLS_LOGLEVEL_MAPS	"lmtp_tls_loglevel_maps"
+#define DEF_LMTP_TLS_LOGLEVEL_MAPS	""
+extern char *var_smtp_tls_loglevel_maps;
+extern char *var_lmtp_tls_loglevel_maps;
 
 #define VAR_SMTP_TLS_NOTEOFFER	"smtp_tls_note_starttls_offer"
 #define DEF_SMTP_TLS_NOTEOFFER	0
@@ -2611,6 +2622,10 @@ extern int var_local_rcpt_code;
 				" $" VAR_VERP_CLIENTS \
 				" $" VAR_XCLIENT_HOSTS \
 				" $" VAR_XFORWARD_HOSTS \
+				" $" VAR_LMTP_TLS_LOGLEVEL_MAPS \
+				" $" VAR_PSC_TLS_LOGLEVEL_MAPS \
+				" $" VAR_SMTP_TLS_LOGLEVEL_MAPS \
+				" $" VAR_SMTPD_TLS_LOGLEVEL_MAPS \
 
 extern char *var_proxy_read_maps;
 
@@ -4737,6 +4752,10 @@ extern char *var_psc_tls_key_file;
 #define VAR_PSC_TLS_LOGLEVEL	"postscreen_tls_loglevel"
 #define DEF_PSC_TLS_LOGLEVEL	"$" VAR_SMTPD_TLS_LOGLEVEL
 extern char *var_psc_tls_loglevel;
+
+#define VAR_PSC_TLS_LOGLEVEL_MAPS "postscreen_tls_loglevel_maps"
+#define DEF_PSC_TLS_LOGLEVEL_MAPS "$" VAR_SMTPD_TLS_LOGLEVEL_MAPS
+extern char *var_psc_tls_loglevel_maps;
 
 #define VAR_PSC_TLS_MAND_CIPH	"postscreen_tls_mandatory_ciphers"
 #define DEF_PSC_TLS_MAND_CIPH	"$" VAR_SMTPD_TLS_MAND_CIPH
